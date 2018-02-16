@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">GreenHouse</string>
+    <string name="greenhouse_2_name">Minas Gerais</string>
+    <string name="greenhouse_1_name">Tropical</string>
+    <string name="inventory">Inventory</string>
+    <string name="add_orchid">Add Orchid</string>
+</resources>
