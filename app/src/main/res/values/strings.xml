@@ -4,4 +4,12 @@
     <string name="greenhouse_1_name">Tropical</string>
     <string name="inventory">Inventory</string>
     <string name="add_orchid">Add Orchid</string>
+    <string name="title_activity_insert_orchid">InsertOrchidActivity</string>
+
+    <!--Strings for Columns Label-->
+    <string name="genus">Genus</string>
+    <string name="species">Species</string>
+    <string name="greenhouse">Greenhouse</string>
+    <string name="is_alive">Is Alive?</string>
+
 </resources>

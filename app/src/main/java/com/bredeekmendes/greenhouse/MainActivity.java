@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements OrchidAdapter.ListItemClickListener {
@@ -58,5 +60,23 @@ public class MainActivity extends AppCompatActivity implements OrchidAdapter.Lis
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int selectedItem = item.getItemId();
+        switch (selectedItem){
+            case R.id.add_orchid:
+                Intent intentToInsertOrchid = new Intent(this,
+                        InsertOrchidActivity.class);
+                startActivity(intentToInsertOrchid);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 }
