@@ -1,6 +1,7 @@
 package com.bredeekmendes.greenhouse;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +10,8 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bredeekmendes.greenhouse.data.OrchidDbContract;
+
 /**
  * Created by arthur on 2/3/18.
  */
@@ -16,9 +19,9 @@ import android.widget.TextView;
 public class OrchidAdapter extends RecyclerView.Adapter<OrchidAdapter.OrchidAdapterViewHolder>{
 
     private static final String TAG = OrchidAdapter.class.getSimpleName();
-    private String[] mGenus;
-    private String[] mSpecies;
     private final ListItemClickListener mListItemClickListener;
+    private Cursor mCursor;
+
 
     public class OrchidAdapterViewHolder extends RecyclerView.ViewHolder implements OnClickListener{
         public final TextView mGenusTextView;
@@ -34,14 +37,14 @@ public class OrchidAdapter extends RecyclerView.Adapter<OrchidAdapter.OrchidAdap
         @Override
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
-            String genusForPosition = mGenus[adapterPosition];
-            String speciesForPosition = mSpecies[adapterPosition];
-            mListItemClickListener.onListItemClick(genusForPosition, speciesForPosition);
+            mCursor.moveToPosition(adapterPosition);
+            long id = mCursor.getLong(mCursor.getColumnIndex(OrchidDbContract.OrchidDataBaseEntry._ID));
+            mListItemClickListener.onListItemClick(id);
         }
     }
 
     public interface ListItemClickListener {
-        void onListItemClick (String genusForThePosition, String speciesForThePosition);
+        void onListItemClick (long id);
     }
 
     public OrchidAdapter(ListItemClickListener click) {
@@ -62,26 +65,31 @@ public class OrchidAdapter extends RecyclerView.Adapter<OrchidAdapter.OrchidAdap
     //this is the position of the view holder. Maybe when I have the table i should get items based on the table ID and position
     @Override
     public void onBindViewHolder(OrchidAdapterViewHolder holder, int position) {
-        String genusForPosition = mGenus[position];
-        String speciesForPosition = mSpecies[position];
-        holder.mGenusTextView.setText(genusForPosition);
-        holder.mSpeciesTextView.setText(speciesForPosition);
+        mCursor.moveToPosition(position);
+        holder.mGenusTextView.setText(mCursor.getString(mCursor.getColumnIndex(OrchidDbContract
+                .OrchidDataBaseEntry.COLUMN_GENUS)));
+        holder.mSpeciesTextView.setText(mCursor.getString(mCursor.getColumnIndex(OrchidDbContract
+                .OrchidDataBaseEntry.COLUMN_SPECIES)));
     }
 
     //this should return the table size
     @Override
     public int getItemCount() {
-        if (null == mSpecies) return 0;
-        return 5;
+        if (null == mCursor) return 0;
+        return mCursor.getCount();
     }
 
-    public void setGenusData(String[] genus) {
-        mGenus = genus;
+    /**
+     * Swaps the cursor used by the ForecastAdapter for its weather data. This method is called by
+     * MainActivity after a load has finished, as well as when the Loader responsible for loading
+     * the weather data is reset. When this method is called, we assume we have a completely new
+     * set of data, so we call notifyDataSetChanged to tell the RecyclerView to update.
+     *
+     * @param newCursor the new cursor to use as ForecastAdapter's data source
+     */
+    void swapCursor(Cursor newCursor) {
+        mCursor = newCursor;
         notifyDataSetChanged();
     }
 
-    public void setSpeciesData(String[] species) {
-        mSpecies = species;
-        notifyDataSetChanged();
-    }
 }

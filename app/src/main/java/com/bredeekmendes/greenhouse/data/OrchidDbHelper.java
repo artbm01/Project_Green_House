@@ -3,7 +3,7 @@ package com.bredeekmendes.greenhouse.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import com.bredeekmendes.greenhouse.data.OrchidDatabaseContract.*;
+import com.bredeekmendes.greenhouse.data.OrchidDbContract.*;
 
 
 
@@ -11,12 +11,12 @@ import com.bredeekmendes.greenhouse.data.OrchidDatabaseContract.*;
  * Created by arthur on 1/30/18.
  */
 
-public class OrchidDatabaseDbHelper extends SQLiteOpenHelper{
+public class OrchidDbHelper extends SQLiteOpenHelper{
 
     private static final String DATABASE_NAME = "orchids.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 7;
 
-    public OrchidDatabaseDbHelper(Context context){
+    public OrchidDbHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
     }
@@ -29,15 +29,19 @@ public class OrchidDatabaseDbHelper extends SQLiteOpenHelper{
         // Creates a String query called SQL_CREATE_ORCHID_DATABASE that will create the table
         // to hold orchid data
         ///TODO make greenhouse INTEGER to be identified by keys
-        final String SQL_CREATE_ORCHID_DATABASE = "CREATE TABLE "+
-                OrchidDataBaseEntry.TABLE_NAME + " (" +
-                OrchidDataBaseEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                OrchidDataBaseEntry.COLUMN_GREENHOUSE + " TEXT " +
-                OrchidDataBaseEntry.COLUMN_GENUS + " TEXT NUT NULL, " +
-                OrchidDataBaseEntry.COLUMN_SPECIES + " TEXT NOT NULL, " +
-                OrchidDataBaseEntry.COLUMN_IS_ALIVE + " BIT NOT NULL, " +
-                OrchidDataBaseEntry.COLUMN_TIMESTAMP + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
-                ");";
+
+
+
+
+        final String SQL_CREATE_ORCHID_DATABASE =        "CREATE TABLE "+
+                OrchidDataBaseEntry.TABLE_NAME         + " (" +
+                OrchidDataBaseEntry._ID                + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                OrchidDataBaseEntry.COLUMN_GREENHOUSE  + " TEXT, " +
+                OrchidDataBaseEntry.COLUMN_GENUS       + " TEXT, " +
+                OrchidDataBaseEntry.COLUMN_SPECIES     + " TEXT, " +
+                OrchidDataBaseEntry.COLUMN_IS_ALIVE    + " TEXT, " +
+                OrchidDataBaseEntry.COLUMN_TIMESTAMP   + " INTEGER" +
+                                                         ");";
 
         //Creates the table
         sqLiteDatabase.execSQL(SQL_CREATE_ORCHID_DATABASE);

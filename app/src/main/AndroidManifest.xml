@@ -32,6 +32,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+        <provider
+            android:authorities="com.bredeekmendes.greenhouse"
+            android:name="com.bredeekmendes.greenhouse.data.OrchidProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

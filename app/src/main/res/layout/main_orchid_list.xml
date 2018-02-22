@@ -5,7 +5,10 @@
     android:id="@+id/main_orchid_list"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginRight="16dp"
+    android:layout_marginLeft="16dp">
 
 
     <TextView

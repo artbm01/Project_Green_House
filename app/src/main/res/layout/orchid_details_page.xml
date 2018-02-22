@@ -19,7 +19,8 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white">
+            android:background="@color/white"
+            android:id="@+id/detail_cl_genus">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -62,7 +63,8 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white">
+            android:background="@color/white"
+            android:id="@+id/detail_cl_species">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -148,7 +150,8 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white">
+            android:background="@color/white"
+            android:id="@+id/detail_cl_is_alive">
 
             <TextView
                 android:layout_width="wrap_content"
