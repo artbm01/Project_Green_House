@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.bredeekmendes.greenhouse.data.OrchidDbContract;
+import com.bredeekmendes.greenhouse.utilities.StringUtils;
 
 /**
  * Created by arthur on 2/3/18.
@@ -38,7 +39,7 @@ public class OrchidAdapter extends RecyclerView.Adapter<OrchidAdapter.OrchidAdap
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
             mCursor.moveToPosition(adapterPosition);
-            long id = mCursor.getLong(mCursor.getColumnIndex(OrchidDbContract.OrchidDataBaseEntry._ID));
+            long id = mCursor.getLong(MainActivity.INDEX_ID);
             mListItemClickListener.onListItemClick(id);
         }
     }
@@ -66,10 +67,10 @@ public class OrchidAdapter extends RecyclerView.Adapter<OrchidAdapter.OrchidAdap
     @Override
     public void onBindViewHolder(OrchidAdapterViewHolder holder, int position) {
         mCursor.moveToPosition(position);
-        holder.mGenusTextView.setText(mCursor.getString(mCursor.getColumnIndex(OrchidDbContract
-                .OrchidDataBaseEntry.COLUMN_GENUS)));
-        holder.mSpeciesTextView.setText(mCursor.getString(mCursor.getColumnIndex(OrchidDbContract
-                .OrchidDataBaseEntry.COLUMN_SPECIES)));
+        holder.mGenusTextView.setText(StringUtils.normalizeString(mCursor.getString(mCursor
+                .getColumnIndex(OrchidDbContract.OrchidDataBaseEntry.COLUMN_GENUS))));
+        holder.mSpeciesTextView.setText(StringUtils.normalizeString(mCursor.getString(mCursor
+                .getColumnIndex(OrchidDbContract.OrchidDataBaseEntry.COLUMN_SPECIES))));
     }
 
     //this should return the table size

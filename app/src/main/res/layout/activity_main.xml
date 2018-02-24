@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackgroundGray"
     tools:context="com.bredeekmendes.greenhouse.MainActivity"
     android:orientation="vertical">
 
@@ -12,13 +11,13 @@
         android:id="@+id/rv_orchids_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white">
+        android:background="@color/colorBackgroundGray">
     </android.support.v7.widget.RecyclerView>
 
     <ProgressBar
         android:id="@+id/pb_loading_indicator"
         android:layout_width="42dp"
         android:layout_height="42dp"
-        android:layout_gravity="center"
+        android:layout_centerInParent="true"
         android:visibility="invisible" />
-</LinearLayout>
+</RelativeLayout>

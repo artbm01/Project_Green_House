@@ -9,6 +9,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.bredeekmendes.greenhouse.utilities.OrchidDateUtils;
+
 /**
  * Created by arthur on 2/21/18.
  */
@@ -121,7 +123,6 @@ public class OrchidProvider extends ContentProvider{
                         null,
                         null,
                         sortOrder);
-
                 break;
             }
 
@@ -143,10 +144,8 @@ public class OrchidProvider extends ContentProvider{
                         null,
                         null,
                         sortOrder);
-
                 break;
             }
-
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -175,6 +174,10 @@ public class OrchidProvider extends ContentProvider{
         Uri returnUri;
         switch (sUriMatcher.match(uri)){
             case CODE_ALL_ORCHIDS:
+/*                long date = values.getAsLong(OrchidDbContract.OrchidDataBaseEntry.COLUMN_TIMESTAMP);
+                if (!OrchidDateUtils.isDateNormalized(date)) {
+                    throw new IllegalArgumentException("Date must be normalized to insert");
+                }*/
                 long id = mOrchidDBHelper.getWritableDatabase().insert(
                         OrchidDbContract.OrchidDataBaseEntry.TABLE_NAME,
                         null,
@@ -224,7 +227,15 @@ public class OrchidProvider extends ContentProvider{
                         selectionArgs);
 
                 break;
+            case CODE_ORCHID_WITH_ID:
+                String id = uri.getLastPathSegment();
+                String[] selectionArguments = new String[]{id};
+                numRowsDeleted = mOrchidDBHelper.getWritableDatabase().delete(
+                        OrchidDbContract.OrchidDataBaseEntry.TABLE_NAME,
+                        OrchidDbContract.OrchidDataBaseEntry._ID + " = ? ",
+                        selectionArguments);
 
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -238,7 +249,27 @@ public class OrchidProvider extends ContentProvider{
     }
 
     @Override
-    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection,
+                      @Nullable String[] selectionArgs) {
+
+        int rowsUpdated;
+
+        switch (sUriMatcher.match(uri)) {
+
+            case CODE_ORCHID_WITH_ID: {
+
+                String id = uri.getLastPathSegment();
+                String[] selectionArguments = new String[]{id};
+
+                rowsUpdated = mOrchidDBHelper.getWritableDatabase().update(
+                        OrchidDbContract.OrchidDataBaseEntry.TABLE_NAME,
+                        values,
+                        OrchidDbContract.OrchidDataBaseEntry._ID + " = ? ",
+                        selectionArguments);
+                break;
+            }
+            default: throw new UnsupportedOperationException("Unknown update uri: "+ uri);
+        }
+    return rowsUpdated;
     }
 }

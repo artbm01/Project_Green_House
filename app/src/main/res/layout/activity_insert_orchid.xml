@@ -109,6 +109,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/insert_orchid_radio_yes"
                 android:text="Yes"
+                android:checked="true"
                 android:layout_weight="1"/>
 
             <RadioButton
@@ -116,10 +117,35 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/insert_orchid_radio_no"
                 android:text="No"
+                android:checked="false"
                 android:layout_weight="1"/>
 
         </RadioGroup>
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:padding="10dp"
+        android:orientation="vertical"
+        android:background="@color/white">
+
+        <TextView
+            android:id="@+id/textDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/date" />
+
+        <EditText
+            android:id="@+id/insert_orchid_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapSentences"
+            android:hint="Insert date" />
 
     </LinearLayout>
 

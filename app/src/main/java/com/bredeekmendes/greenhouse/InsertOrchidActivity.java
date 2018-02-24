@@ -1,39 +1,70 @@
 package com.bredeekmendes.greenhouse;
 
+import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.app.DatePickerDialog.OnDateSetListener;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
 import com.bredeekmendes.greenhouse.data.OrchidDbContract;
+import com.bredeekmendes.greenhouse.utilities.OrchidDateUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 
-public class InsertOrchidActivity extends AppCompatActivity {
+public class InsertOrchidActivity extends AppCompatActivity implements View.OnClickListener {
 
     EditText mGenus;
     EditText mSpecies;
     EditText mGreenhouse;
-    Boolean isAlive;
     RadioButton mYes;
     RadioButton mNo;
+    EditText mDate;
+    private DatePickerDialog mDatePickerDialog;
 
+    private DatePickerDialog.OnDateSetListener mDateListener;
+    private SimpleDateFormat dateFormatter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_insert_orchid);
 
-        mGenus = findViewById(R.id.insert_orchid_genus);
-        mSpecies = findViewById(R.id.insert_orchid_species);
-        mGreenhouse = findViewById(R.id.insert_orchid_greenhouse);
-        mYes = findViewById(R.id.insert_orchid_radio_yes);
-        mNo = findViewById(R.id.insert_orchid_radio_no);
+        bindViews();
+
+        dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+
+        mDate.setOnClickListener(this);
+        Calendar newCalendar = Calendar.getInstance();
+        mDatePickerDialog = new DatePickerDialog(this, new OnDateSetListener() {
+
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                Calendar newDate = Calendar.getInstance();
+                newDate.set(year, monthOfYear, dayOfMonth);
+                mDate.setText(dateFormatter.format(newDate.getTime()));
+            }
+
+        },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+
+    }
+
+    @Override
+    public void onClick(View view) {
+        mDatePickerDialog.show();
     }
 
     @Override
@@ -47,12 +78,17 @@ public class InsertOrchidActivity extends AppCompatActivity {
         Log.d("Debug", "buttonclicked");
         int selectedItem = item.getItemId();
         switch (selectedItem){
-            case R.id.add_orchid:
-                Log.d("Debug", "clickedtoadd");
+            case R.id.insert_button_menu:
+                long date = OrchidDateUtils.getNormalizedUtcDateForToday();
                 Uri uri = getContentResolver().
                         insert(OrchidDbContract.OrchidDataBaseEntry.CONTENT_URI,
                                 textEditsToContentValues());
+                clearTextViews();
+                Toast.makeText(this,uri.getLastPathSegment(),Toast.LENGTH_LONG).show();
+                hideKeyboard(this);
+                Toast.makeText(this, "Orchid added!", Toast.LENGTH_SHORT).show();
                 break;
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -74,21 +110,35 @@ public class InsertOrchidActivity extends AppCompatActivity {
         return cv;
     }
 
-/*    public void onRadioButtonClicked(View view) {
-        // Is the button now checked?
-        boolean checked = ((RadioButton) view).isChecked();
+    private void clearTextViews(){
+        mGenus.setText("");
+        mGenus.clearFocus();
+        mSpecies.setText("");
+        mSpecies.clearFocus();
+        mGreenhouse.setText("");
+        mGreenhouse.clearFocus();
+        mNo.setChecked(true);
+        mNo.setChecked(false);
+    }
 
-        // Check which radio button was clicked
-        switch(view.getId()) {
-            case R.id.insert_orchid_radio_yes:
-                if (checked)
-                    isAlive = true;
-                    break;
-            case R.id.insert_orchid_radio_no:
-                if (checked)
-                    isAlive = false;;
-                    break;
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = activity.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(activity);
         }
-    }*/
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    private void bindViews(){
+        mGenus = findViewById(R.id.insert_orchid_genus);
+        mSpecies = findViewById(R.id.insert_orchid_species);
+        mGreenhouse = findViewById(R.id.insert_orchid_greenhouse);
+        mYes = findViewById(R.id.insert_orchid_radio_yes);
+        mNo = findViewById(R.id.insert_orchid_radio_no);
+        mDate = findViewById(R.id.insert_orchid_date);
+    }
 
 }

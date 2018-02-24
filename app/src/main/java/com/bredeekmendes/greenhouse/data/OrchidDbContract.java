@@ -48,7 +48,7 @@ public class OrchidDbContract {
          * @param id Normalized date in milliseconds
          * @return Uri to query details about a single orchid entry
          */
-        public static Uri buildWeatherUriWithId(long id) {
+        public static Uri buildOrchidUriWithId(long id) {
             return CONTENT_URI.buildUpon()
                     .appendPath(Long.toString(id))
                     .build();

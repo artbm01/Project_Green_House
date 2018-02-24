@@ -14,7 +14,7 @@ import com.bredeekmendes.greenhouse.data.OrchidDbContract.*;
 public class OrchidDbHelper extends SQLiteOpenHelper{
 
     private static final String DATABASE_NAME = "orchids.db";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 9;
 
     public OrchidDbHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -40,7 +40,7 @@ public class OrchidDbHelper extends SQLiteOpenHelper{
                 OrchidDataBaseEntry.COLUMN_GENUS       + " TEXT, " +
                 OrchidDataBaseEntry.COLUMN_SPECIES     + " TEXT, " +
                 OrchidDataBaseEntry.COLUMN_IS_ALIVE    + " TEXT, " +
-                OrchidDataBaseEntry.COLUMN_TIMESTAMP   + " INTEGER" +
+                OrchidDataBaseEntry.COLUMN_TIMESTAMP   + " INT" +
                                                          ");";
 
         //Creates the table

@@ -11,11 +11,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.bredeekmendes.greenhouse.data.OrchidDbContract;
 
@@ -26,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements OrchidAdapter.Lis
 
     private RecyclerView mRecyclerView;
     private OrchidAdapter mOrchidAdapter;
+    private Cursor mCursor;
 
     private static final int ID_ORCHID_LOADER = 44;
     public static final String[] MAIN_FORECAST_PROJECTION = {
@@ -57,18 +60,53 @@ public class MainActivity extends AppCompatActivity implements OrchidAdapter.Lis
         mOrchidAdapter = new OrchidAdapter(this);
         mRecyclerView.setAdapter(mOrchidAdapter);
 
-        Log.d("Debug","before fake data");
 
-       /* insertFakeData("laelia", "labiata");
+/*        insertFakeData("laelia", "labiata");
         insertFakeData("laelia", "purpurata");
         insertFakeData("catleya", "brasiliense");
         insertFakeData("epidendrum", "lala");
         insertFakeData("laelia", "labiata");*/
 
 
-        Log.d("Debug","after fake data");
         showLoading();
         getSupportLoaderManager().initLoader(ID_ORCHID_LOADER, null, this);
+
+        /*
+         Add a touch helper to the RecyclerView to recognize when a user swipes to delete an item.
+         An ItemTouchHelper enables touch behavior (like swipe and move) on each ViewHolder,
+         and uses callbacks to signal when a user is performing these actions.
+         */
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
+                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            // Called when a user swipes left or right on a ViewHolder
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                // Here is where you'll implement swipe to delete
+
+                // COMPLETED (1) Construct the URI for the item to delete
+                //[Hint] Use getTag (from the adapter code) to get the id of the swiped item
+                // Retrieve the id of the task to delete
+                int id = viewHolder.getAdapterPosition();
+                mCursor.moveToPosition(id);
+                String stringId = mCursor.getString(mCursor.getColumnIndex(OrchidDbContract.OrchidDataBaseEntry._ID));
+                // Build appropriate uri with String row id appended
+                Uri uri = OrchidDbContract.OrchidDataBaseEntry.CONTENT_URI;
+                uri = uri.buildUpon().appendPath(stringId).build();
+
+                // COMPLETED (2) Delete a single row of data using a ContentResolver
+                getContentResolver().delete(uri, null, null);
+
+                // COMPLETED (3) Restart the loader to re-query for all tasks after a deletion
+                getSupportLoaderManager().restartLoader(ID_ORCHID_LOADER, null,
+                        MainActivity.this);
+            }
+        }).attachToRecyclerView(mRecyclerView);
 
     }
 
@@ -82,8 +120,9 @@ public class MainActivity extends AppCompatActivity implements OrchidAdapter.Lis
     @Override
     public void onListItemClick(long id) {
         Intent intentDetailActivity = new Intent(MainActivity.this, DetailOrchids.class);
-        Uri uriForOrchidClicked = OrchidDbContract.OrchidDataBaseEntry.buildWeatherUriWithId(id);
+        Uri uriForOrchidClicked = OrchidDbContract.OrchidDataBaseEntry.buildOrchidUriWithId(id);
         intentDetailActivity.setData(uriForOrchidClicked);
+        Log.e("Debug",uriForOrchidClicked.toString());
         startActivity(intentDetailActivity);
 
     }
@@ -96,8 +135,7 @@ public class MainActivity extends AppCompatActivity implements OrchidAdapter.Lis
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int selectedItem = item.getItemId();
-        switch (selectedItem){
+        switch (item.getItemId()){
             case R.id.add_orchid:
                 Intent intentToInsertOrchid = new Intent(this,
                         InsertOrchidActivity.class);
@@ -137,10 +175,14 @@ public class MainActivity extends AppCompatActivity implements OrchidAdapter.Lis
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mCursor = data;
         mOrchidAdapter.swapCursor(data);
         if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
         mRecyclerView.smoothScrollToPosition(mPosition);
-        if (data.getCount() != 0) showWeatherDataView();
+        showWeatherDataView();
+        if (data.getCount() == 0) {
+            Toast.makeText(this, "No orchid to show!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

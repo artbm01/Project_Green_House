@@ -11,5 +11,6 @@
     <string name="species">Species</string>
     <string name="greenhouse">Greenhouse</string>
     <string name="is_alive">Is Alive?</string>
+    <string name="date">Date added</string>
 
 </resources>
