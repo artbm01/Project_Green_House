@@ -9,10 +9,13 @@ import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bredeekmendes.greenhouse.data.OrchidDbContract;
 import com.bredeekmendes.greenhouse.utilities.StringUtils;
@@ -33,11 +36,13 @@ public class DetailOrchids extends AppCompatActivity implements
     TextView mGreenhouse;
     TextView mIsAlive;
     TextView mDatetime;
+    EditText mEditGenus;
     View vGenus;
     View vSpecies;
     View vGreenhouse;
     View vIsAlive;
     View vDatetime;
+    Menu menu;
 
     private static final int ID_ORCHID_LOADER = 77;
 
@@ -45,7 +50,7 @@ public class DetailOrchids extends AppCompatActivity implements
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.details_orchid_page);
+        setContentView(R.layout.activity_details_orchid);
 
 
 
@@ -59,6 +64,8 @@ public class DetailOrchids extends AppCompatActivity implements
         vGreenhouse = findViewById(R.id.detail_cl_greenhouse);
         vIsAlive = findViewById(R.id.detail_cl_is_alive);
         vDatetime = findViewById(R.id.detail_cl_datetime);
+        vGenus.setOnLongClickListener(new MyLongClickListener());
+        mEditGenus = findViewById(R.id.detail_edit_genus);
 
         getSupportLoaderManager().initLoader(ID_ORCHID_LOADER, null, this);
 
@@ -123,6 +130,7 @@ public class DetailOrchids extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.detail_orchid_menu, menu);
+        this.menu = menu;
         return true;
     }
 
@@ -138,7 +146,12 @@ public class DetailOrchids extends AppCompatActivity implements
                         null);
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
-
+            case R.id.update_button_menu:
+                MenuItem updateIcon = menu.findItem(R.id.update_button_menu);
+                updateIcon.setVisible(false);
+                mEditGenus.setFocusable(false);
+                updateTextViews();
+                Toast.makeText(this, "Update", Toast.LENGTH_SHORT).show();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -148,6 +161,33 @@ public class DetailOrchids extends AppCompatActivity implements
         Date dateParsed = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(date);
         String dateFormatted = new SimpleDateFormat("MM-dd-yyyy").format(dateParsed);
         return dateFormatted;
+    }
+
+    private class MyLongClickListener implements View.OnLongClickListener{
+        @Override
+        public boolean onLongClick(View v) {
+            mEditGenus.setVisibility(View.VISIBLE);
+            mGenus.setVisibility(View.GONE);
+            MenuItem updateIcon = menu.findItem(R.id.update_button_menu);
+            updateIcon.setVisible(true);
+            mEditGenus.setHint(mGenus.getText());
+            //mEditGenus.hasFocus();
+            mEditGenus.setFocusableInTouchMode(true);
+            Toast.makeText(DetailOrchids.this, "v", Toast.LENGTH_SHORT).show();
+            Log.d("Debug",v.toString());
+            return true;
+        }
+    }
+
+    private void updateTextViews(){
+        mGenus.setText(mEditGenus.getText());
+        mEditGenus.setText(null);
+        setEditsInvisible();
+    }
+
+    private void setEditsInvisible(){
+        mGenus.setVisibility(View.VISIBLE);
+        mEditGenus.setVisibility(View.GONE);
     }
 
 }

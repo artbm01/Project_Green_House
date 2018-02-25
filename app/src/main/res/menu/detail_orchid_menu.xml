@@ -6,5 +6,10 @@
         android:id="@+id/delete_button_menu"
         android:title="Delete"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/update_button_menu"
+        android:title="Update"
+        app:showAsAction="always"
+        android:visible="false"/>
 
 </menu>
