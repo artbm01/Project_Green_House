@@ -270,6 +270,7 @@ public class OrchidProvider extends ContentProvider{
             }
             default: throw new UnsupportedOperationException("Unknown update uri: "+ uri);
         }
-    return rowsUpdated;
+        getContext().getContentResolver().notifyChange(uri, null);
+        return rowsUpdated;
     }
 }

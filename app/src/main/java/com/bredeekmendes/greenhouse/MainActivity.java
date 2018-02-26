@@ -60,13 +60,11 @@ public class MainActivity extends AppCompatActivity implements OrchidAdapter.Lis
         mOrchidAdapter = new OrchidAdapter(this);
         mRecyclerView.setAdapter(mOrchidAdapter);
 
-
 /*        insertFakeData("laelia", "labiata");
         insertFakeData("laelia", "purpurata");
         insertFakeData("catleya", "brasiliense");
         insertFakeData("epidendrum", "lala");
         insertFakeData("laelia", "labiata");*/
-
 
         showLoading();
         getSupportLoaderManager().initLoader(ID_ORCHID_LOADER, null, this);
@@ -206,5 +204,19 @@ public class MainActivity extends AppCompatActivity implements OrchidAdapter.Lis
         mRecyclerView.setVisibility(View.INVISIBLE);
         /* Finally, show the loading indicator */
         mLoadingIndicator.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getSupportLoaderManager().restartLoader(ID_ORCHID_LOADER, null,
+                MainActivity.this);
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        getSupportLoaderManager().restartLoader(ID_ORCHID_LOADER, null,
+                MainActivity.this);
     }
 }

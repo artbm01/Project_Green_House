@@ -1,10 +1,21 @@
 package com.bredeekmendes.greenhouse.utilities;
 
+import android.text.Editable;
+
 /**
  * Created by arthur on 2/21/18.
  */
 
 public class StringUtils {
+
+
+
+    public static String normalizeString(Editable text){
+        String string;
+        string = text.toString();
+        return normalizeString(string);
+    }
+
     public static String normalizeString(String string) {
         if (string == "" || string==null) {
             return "";

@@ -1,5 +1,8 @@
 package com.bredeekmendes.greenhouse;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -8,12 +11,16 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,29 +38,20 @@ import java.util.Date;
 public class DetailOrchids extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>{
 
-    TextView mGenus;
-    TextView mSpecies;
-    TextView mGreenhouse;
-    TextView mIsAlive;
-    TextView mDatetime;
-    EditText mEditGenus;
-    View vGenus;
-    View vSpecies;
-    View vGreenhouse;
-    View vIsAlive;
-    View vDatetime;
-    Menu menu;
+    private final Context detailContext = this;
+    private Uri orchidUri;
+    private TextView mGenus, mSpecies, mGreenhouse, mIsAlive, mDatetime;
+    private View vGenus, vSpecies, vGreenhouse, vIsAlive, vDatetime;
+    private Menu menu;
 
     private static final int ID_ORCHID_LOADER = 77;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details_orchid);
 
-
-
+        /*Binding views*/
         mGenus = findViewById(R.id.detail_genus);
         mSpecies = findViewById(R.id.detail_species);
         mGreenhouse = findViewById(R.id.detail_greenhouse);
@@ -65,19 +63,13 @@ public class DetailOrchids extends AppCompatActivity implements
         vIsAlive = findViewById(R.id.detail_cl_is_alive);
         vDatetime = findViewById(R.id.detail_cl_datetime);
         vGenus.setOnLongClickListener(new MyLongClickListener());
-        mEditGenus = findViewById(R.id.detail_edit_genus);
+        vSpecies.setOnLongClickListener(new MyLongClickListener());
+        vGreenhouse.setOnLongClickListener(new MyLongClickListener());
+        vIsAlive.setOnLongClickListener(new MyLongClickListener());
 
+        Intent intentThatStartedThisActivity = getIntent();
+        orchidUri = intentThatStartedThisActivity.getData();
         getSupportLoaderManager().initLoader(ID_ORCHID_LOADER, null, this);
-
-
-    }
-
-    private void loadDetailData(TextView textView, String value, View view){
-        value = StringUtils.normalizeString(value);
-        if (value.isEmpty() || value==""){
-            view.setVisibility(View.GONE);
-        }
-        textView.setText(StringUtils.normalizeString(value));
     }
 
     @Override
@@ -138,20 +130,15 @@ public class DetailOrchids extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.delete_button_menu:
-                Intent intentThatStartedThisActivity = getIntent();
-                Uri orchidQueryUri = intentThatStartedThisActivity.getData();
-                String id = orchidQueryUri.getLastPathSegment();
-                String[] selectionArguments = new String[]{id};
-                getContentResolver().delete(orchidQueryUri,null,
-                        null);
+                getContentResolver().delete(orchidUri,null,null);
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
             case R.id.update_button_menu:
+                //Makes the button to invisible
                 MenuItem updateIcon = menu.findItem(R.id.update_button_menu);
                 updateIcon.setVisible(false);
-                mEditGenus.setFocusable(false);
-                updateTextViews();
-                Toast.makeText(this, "Update", Toast.LENGTH_SHORT).show();
+                updateAllFields();
+                NavUtils.navigateUpFromSameTask(this);
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -165,29 +152,126 @@ public class DetailOrchids extends AppCompatActivity implements
 
     private class MyLongClickListener implements View.OnLongClickListener{
         @Override
-        public boolean onLongClick(View v) {
-            mEditGenus.setVisibility(View.VISIBLE);
-            mGenus.setVisibility(View.GONE);
+        public boolean onLongClick(View view) {
+            //Shows the update button on the action bar
             MenuItem updateIcon = menu.findItem(R.id.update_button_menu);
             updateIcon.setVisible(true);
-            mEditGenus.setHint(mGenus.getText());
-            //mEditGenus.hasFocus();
-            mEditGenus.setFocusableInTouchMode(true);
-            Toast.makeText(DetailOrchids.this, "v", Toast.LENGTH_SHORT).show();
-            Log.d("Debug",v.toString());
+            if (view.getId()==vIsAlive.getId()){
+                alivePrompt();
+            }
+            else {textPrompt(view);}
             return true;
         }
     }
 
-    private void updateTextViews(){
-        mGenus.setText(mEditGenus.getText());
-        mEditGenus.setText(null);
-        setEditsInvisible();
+    /**
+     * Handles query requests from clients. This is used in Project Greenhouse to query for all
+     * the orchid data
+     *
+     * @param textView           Detail that shows up on the card
+     * @param value              Title that shows up on the card
+     * @param view               The view that contains the card
+     */
+    private void loadDetailData(TextView textView, String value, View view){
+        value = StringUtils.normalizeString(value);
+        if (value.isEmpty() || value==""){
+            view.setVisibility(View.GONE);
+        }
+        textView.setText(StringUtils.normalizeString(value));
     }
 
-    private void setEditsInvisible(){
-        mGenus.setVisibility(View.VISIBLE);
-        mEditGenus.setVisibility(View.GONE);
+    /**
+     * This method calls a prompt for the user to change TEXT in orchid data
+     */
+    private void textPrompt(View view){
+        final View thisView = view;
+        LayoutInflater li = LayoutInflater.from(detailContext);
+        View promptsView = li.inflate(R.layout.text_prompt, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                detailContext);
+
+        alertDialogBuilder.setView(promptsView);
+        final EditText userInput = promptsView.findViewById(R.id.text_user_input);
+        final TextView titlePrompt = promptsView.findViewById(R.id.title_text_prompt);
+        alertDialogBuilder
+                .setCancelable(true)
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                switch (thisView.getId()){
+                                    case R.id.detail_cl_genus:
+                                        titlePrompt.setText("Genus:");
+                                        mGenus.setText(StringUtils.normalizeString(userInput.getText()));
+                                        break;
+                                    case R.id.detail_cl_species:
+                                        titlePrompt.setText("Species:");
+                                        mSpecies.setText(StringUtils.normalizeString(userInput.getText()));
+                                        break;
+                                    case R.id.detail_cl_greenhouse:
+                                        titlePrompt.setText("Greenhouse:");
+                                        mGreenhouse.setText(StringUtils.normalizeString(userInput.getText()));
+                                        break;
+                                }
+                            }
+                        })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
+    /**
+     * This method calls a prompt for the user to change IS_ALIVE in orchid data
+     */
+    private void alivePrompt(){
+        LayoutInflater li = LayoutInflater.from(detailContext);
+        View promptsView = li.inflate(R.layout.alive_prompt, null);
+
+        final RadioGroup group = promptsView.findViewById(R.id.radio_group);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                detailContext);
+
+        alertDialogBuilder.setView(promptsView);
+        alertDialogBuilder
+                .setCancelable(true)
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                Log.d("Debug",Integer.toString(group.getCheckedRadioButtonId()));
+                                switch (group.getCheckedRadioButtonId()){
+                                    case R.id.alive_yes:
+                                        mIsAlive.setText("Yes");
+                                        break;
+                                    case R.id.alive_no:
+                                        mIsAlive.setText("No");
+                                        break;
+                                }
+                            }
+                        })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * Takes the data currently showing on the TextViews and updates the database with the values
+     */
+    private void updateAllFields(){
+        ContentValues cv = new ContentValues();
+        cv.put(OrchidDbContract.OrchidDataBaseEntry.COLUMN_GENUS,mGenus.getText().toString());
+        cv.put(OrchidDbContract.OrchidDataBaseEntry.COLUMN_SPECIES,mSpecies.getText().toString());
+        cv.put(OrchidDbContract.OrchidDataBaseEntry.COLUMN_GREENHOUSE,mGreenhouse.getText().toString());
+        cv.put(OrchidDbContract.OrchidDataBaseEntry.COLUMN_IS_ALIVE,mIsAlive.getText().toString());
+        getContentResolver().update(orchidUri,cv,null,null);
+        Toast.makeText(detailContext, "Orchid updated!", Toast.LENGTH_SHORT).show();
+    }
 }

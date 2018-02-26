@@ -28,14 +28,10 @@ import java.util.Locale;
 
 public class InsertOrchidActivity extends AppCompatActivity implements View.OnClickListener {
 
-    EditText mGenus;
-    EditText mSpecies;
-    EditText mGreenhouse;
-    RadioButton mYes;
-    RadioButton mNo;
-    EditText mDate;
-    private DatePickerDialog mDatePickerDialog;
+    EditText mGenus, mSpecies, mGreenhouse, mDate;
+    RadioButton mYes, mNo;
 
+    private DatePickerDialog mDatePickerDialog;
     private DatePickerDialog.OnDateSetListener mDateListener;
     private SimpleDateFormat dateFormatter;
 
@@ -84,7 +80,6 @@ public class InsertOrchidActivity extends AppCompatActivity implements View.OnCl
                         insert(OrchidDbContract.OrchidDataBaseEntry.CONTENT_URI,
                                 textEditsToContentValues());
                 clearTextViews();
-                Toast.makeText(this,uri.getLastPathSegment(),Toast.LENGTH_LONG).show();
                 hideKeyboard(this);
                 Toast.makeText(this, "Orchid added!", Toast.LENGTH_SHORT).show();
                 break;
