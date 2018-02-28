@@ -105,12 +105,12 @@ public class DetailOrchids extends AppCompatActivity implements
             String species = data.getString(data.getColumnIndex(OrchidDbContract.OrchidDataBaseEntry.COLUMN_SPECIES));
             String greenhouse = data.getString(data.getColumnIndex(OrchidDbContract.OrchidDataBaseEntry.COLUMN_GREENHOUSE));
             String isAlive = data.getString(data.getColumnIndex(OrchidDbContract.OrchidDataBaseEntry.COLUMN_IS_ALIVE));
-            String datetime = data.getString(data.getColumnIndex(OrchidDbContract.OrchidDataBaseEntry.COLUMN_TIMESTAMP));
+            Long datetime = data.getLong(data.getColumnIndex(OrchidDbContract.OrchidDataBaseEntry.COLUMN_TIMESTAMP));
             loadDetailData(mGenus, genus, vGenus);
             loadDetailData(mSpecies, species, vSpecies);
             loadDetailData(mGreenhouse, greenhouse, vGreenhouse);
             loadDetailData(mIsAlive, isAlive, vIsAlive);
-            loadDetailData(mDatetime, datetime, vDatetime);
+            loadDateData(mDatetime, datetime, vDatetime);
         }
     }
 
@@ -144,12 +144,6 @@ public class DetailOrchids extends AppCompatActivity implements
         }
     }
 
-    private String dateFormatting(String date) throws ParseException {
-        Date dateParsed = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(date);
-        String dateFormatted = new SimpleDateFormat("MM-dd-yyyy").format(dateParsed);
-        return dateFormatted;
-    }
-
     private class MyLongClickListener implements View.OnLongClickListener{
         @Override
         public boolean onLongClick(View view) {
@@ -178,6 +172,15 @@ public class DetailOrchids extends AppCompatActivity implements
             view.setVisibility(View.GONE);
         }
         textView.setText(StringUtils.normalizeString(value));
+    }
+
+    private void loadDateData(TextView textView, Long date, View view){
+        if (date==0){
+            view.setVisibility(View.GONE);
+        }
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM/yyyy");
+        String value = formatter.format(date);
+        textView.setText(value);
     }
 
     /**

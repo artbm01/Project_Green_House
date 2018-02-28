@@ -132,7 +132,8 @@
         android:layout_marginRight="10dp"
         android:padding="10dp"
         android:orientation="vertical"
-        android:background="@color/white">
+        android:background="@color/white"
+        android:id="@+id/date_test">
 
         <TextView
             android:id="@+id/textDate"
@@ -144,7 +145,8 @@
             android:id="@+id/insert_orchid_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textCapSentences"
+            android:focusable="false"
+            android:inputType="none"
             android:hint="Insert date" />
 
     </LinearLayout>

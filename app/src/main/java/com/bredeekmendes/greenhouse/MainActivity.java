@@ -1,9 +1,11 @@
 package com.bredeekmendes.greenhouse;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -12,6 +14,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,15 +23,22 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bredeekmendes.greenhouse.data.OrchidDbContract;
+import com.bredeekmendes.greenhouse.utilities.OrchidDateUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements OrchidAdapter.ListItemClickListener,
         LoaderManager.LoaderCallbacks<Cursor>{
 
 
-
+    private Context context = MainActivity.this;
     private RecyclerView mRecyclerView;
     private OrchidAdapter mOrchidAdapter;
     private Cursor mCursor;
+    private ContentValues deletedOrchid;
 
     private static final int ID_ORCHID_LOADER = 44;
     public static final String[] MAIN_FORECAST_PROJECTION = {
@@ -85,24 +95,34 @@ public class MainActivity extends AppCompatActivity implements OrchidAdapter.Lis
             // Called when a user swipes left or right on a ViewHolder
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-                // Here is where you'll implement swipe to delete
-
-                // COMPLETED (1) Construct the URI for the item to delete
-                //[Hint] Use getTag (from the adapter code) to get the id of the swiped item
-                // Retrieve the id of the task to delete
+                //Get the item id to create the correct URI
                 int id = viewHolder.getAdapterPosition();
                 mCursor.moveToPosition(id);
                 String stringId = mCursor.getString(mCursor.getColumnIndex(OrchidDbContract.OrchidDataBaseEntry._ID));
+
                 // Build appropriate uri with String row id appended
                 Uri uri = OrchidDbContract.OrchidDataBaseEntry.CONTENT_URI;
                 uri = uri.buildUpon().appendPath(stringId).build();
 
-                // COMPLETED (2) Delete a single row of data using a ContentResolver
-                getContentResolver().delete(uri, null, null);
+                //Saves the orchid data for undo purposes
+                deletedOrchid = new ContentValues();
+                for (int column=0; column<mCursor.getColumnCount(); column++){
+                    deletedOrchid.put(mCursor.getColumnName(column),mCursor.getString(column));
+                }
 
-                // COMPLETED (3) Restart the loader to re-query for all tasks after a deletion
-                getSupportLoaderManager().restartLoader(ID_ORCHID_LOADER, null,
-                        MainActivity.this);
+                Snackbar snackbar = Snackbar
+                        .make(mRecyclerView, "ORCHID REMOVED", Snackbar.LENGTH_LONG)
+                        .setAction("UNDO", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                getContentResolver().insert(OrchidDbContract.OrchidDataBaseEntry.CONTENT_URI,deletedOrchid);
+
+                            }
+                        });
+                snackbar.show();
+
+                getContentResolver().delete(uri, null, null);
+                mOrchidAdapter.notifyItemRemoved(id);
             }
         }).attachToRecyclerView(mRecyclerView);
 
@@ -175,9 +195,7 @@ public class MainActivity extends AppCompatActivity implements OrchidAdapter.Lis
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursor = data;
         mOrchidAdapter.swapCursor(data);
-        if (mPosition == RecyclerView.NO_POSITION) mPosition = 0;
-        mRecyclerView.smoothScrollToPosition(mPosition);
-        showWeatherDataView();
+        showOrchidsDataView();
         if (data.getCount() == 0) {
             Toast.makeText(this, "No orchid to show!", Toast.LENGTH_SHORT).show();
         }
@@ -192,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements OrchidAdapter.Lis
         mOrchidAdapter.swapCursor(null);
     }
 
-    private void showWeatherDataView(){
+    private void showOrchidsDataView(){
         /* First, hide the loading indicator */
         mLoadingIndicator.setVisibility(View.INVISIBLE);
         /* Finally, make sure the weather data is visible */

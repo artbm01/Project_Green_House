@@ -3,6 +3,8 @@ package com.bredeekmendes.greenhouse;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,21 +21,29 @@ import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.bredeekmendes.greenhouse.data.OrchidDbContract;
+import com.bredeekmendes.greenhouse.utilities.MonthYearPicker;
 import com.bredeekmendes.greenhouse.utilities.OrchidDateUtils;
+import com.bredeekmendes.greenhouse.utilities.ViewsUtil;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 
 public class InsertOrchidActivity extends AppCompatActivity implements View.OnClickListener {
 
     EditText mGenus, mSpecies, mGreenhouse, mDate;
+    View Date;
     RadioButton mYes, mNo;
+    private long datePicked=0;
 
     private DatePickerDialog mDatePickerDialog;
     private DatePickerDialog.OnDateSetListener mDateListener;
     private SimpleDateFormat dateFormatter;
+    private MonthYearPicker myp;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,26 +51,36 @@ public class InsertOrchidActivity extends AppCompatActivity implements View.OnCl
         setContentView(R.layout.activity_insert_orchid);
 
         bindViews();
-
+        Date = findViewById(R.id.date_test);
         dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
 
         mDate.setOnClickListener(this);
-        Calendar newCalendar = Calendar.getInstance();
-        mDatePickerDialog = new DatePickerDialog(this, new OnDateSetListener() {
 
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                Calendar newDate = Calendar.getInstance();
-                newDate.set(year, monthOfYear, dayOfMonth);
-                mDate.setText(dateFormatter.format(newDate.getTime()));
+        myp = new MonthYearPicker(this);
+        myp.build(new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mDate.setText(myp.getSelectedMonthShortName() + " / " + myp.getSelectedYear());
+                String date = "01/"+(myp.getSelectedMonth()+1)+"/"+myp.getSelectedYear();
+                try {
+                    Date date1 = new SimpleDateFormat("dd/MM/yyyy").parse(date);
+                    long dateInMillis = date1.getTime();
+                    datePicked = dateInMillis;
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
             }
-
-        },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+        }, null);
 
     }
 
+
     @Override
     public void onClick(View view) {
-        mDatePickerDialog.show();
+        ViewsUtil.hideKeyboard(this);
+        myp.show();
     }
 
     @Override
@@ -71,16 +91,15 @@ public class InsertOrchidActivity extends AppCompatActivity implements View.OnCl
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d("Debug", "buttonclicked");
         int selectedItem = item.getItemId();
         switch (selectedItem){
             case R.id.insert_button_menu:
-                long date = OrchidDateUtils.getNormalizedUtcDateForToday();
+                long date = System.currentTimeMillis();
                 Uri uri = getContentResolver().
                         insert(OrchidDbContract.OrchidDataBaseEntry.CONTENT_URI,
                                 textEditsToContentValues());
                 clearTextViews();
-                hideKeyboard(this);
+                ViewsUtil.hideKeyboard(this);
                 Toast.makeText(this, "Orchid added!", Toast.LENGTH_SHORT).show();
                 break;
 
@@ -94,6 +113,13 @@ public class InsertOrchidActivity extends AppCompatActivity implements View.OnCl
         String orchidSpecies = mSpecies.getText().toString();
         String orchidGreenhouse = mGreenhouse.getText().toString();
         String isAlive;
+        long date;
+        if (datePicked==0){
+            date= System.currentTimeMillis();
+        }
+        else date = datePicked;
+        Toast.makeText(InsertOrchidActivity.this,Long.toString(date),Toast.LENGTH_SHORT).show();
+        Log.d("Debug",Long.toString(date));
         if (mNo.isChecked() && !(mNo.isChecked())){
             isAlive = "No";
         } else {isAlive = "Yes";}
@@ -101,7 +127,7 @@ public class InsertOrchidActivity extends AppCompatActivity implements View.OnCl
         cv.put(OrchidDbContract.OrchidDataBaseEntry.COLUMN_SPECIES, orchidSpecies);
         cv.put(OrchidDbContract.OrchidDataBaseEntry.COLUMN_GREENHOUSE, orchidGreenhouse);
         cv.put(OrchidDbContract.OrchidDataBaseEntry.COLUMN_IS_ALIVE, isAlive);
-        Log.d("Debug", "sending values to cv");
+        cv.put(OrchidDbContract.OrchidDataBaseEntry.COLUMN_TIMESTAMP,date);
         return cv;
     }
 
@@ -114,17 +140,6 @@ public class InsertOrchidActivity extends AppCompatActivity implements View.OnCl
         mGreenhouse.clearFocus();
         mNo.setChecked(true);
         mNo.setChecked(false);
-    }
-
-    public static void hideKeyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        //Find the currently focused view, so we can grab the correct window token from it.
-        View view = activity.getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
-        if (view == null) {
-            view = new View(activity);
-        }
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     private void bindViews(){

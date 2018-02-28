@@ -273,4 +273,6 @@ public class OrchidProvider extends ContentProvider{
         getContext().getContentResolver().notifyChange(uri, null);
         return rowsUpdated;
     }
+
+    public void test(){}
 }
