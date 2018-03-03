@@ -4,7 +4,9 @@ package com.bredeekmendes.greenhouse.utilities;
  * Created by arthur on 2/22/18.
  */
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -267,5 +269,16 @@ public class OrchidDateUtils {
                 SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE");
                 return dayFormat.format(dateInMillis);
         }
+    }
+
+    public static long getDateInMillis (String date){
+        long dateInMillis=0;
+        try {
+            Date date1 = new SimpleDateFormat("dd/MM/yyyy").parse(date);
+            dateInMillis = date1.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return dateInMillis;
     }
 }

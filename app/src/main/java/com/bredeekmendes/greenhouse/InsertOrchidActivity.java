@@ -1,48 +1,39 @@
 package com.bredeekmendes.greenhouse;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.app.DatePickerDialog.OnDateSetListener;
 
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.bredeekmendes.greenhouse.data.OrchidDbContract;
 import com.bredeekmendes.greenhouse.utilities.MonthYearPicker;
-import com.bredeekmendes.greenhouse.utilities.OrchidDateUtils;
 import com.bredeekmendes.greenhouse.utilities.ViewsUtil;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 
 public class InsertOrchidActivity extends AppCompatActivity implements View.OnClickListener {
 
     EditText mGenus, mSpecies, mGreenhouse, mDate;
-    View Date;
     RadioButton mYes, mNo;
     private long datePicked=0;
 
     private DatePickerDialog mDatePickerDialog;
     private DatePickerDialog.OnDateSetListener mDateListener;
     private SimpleDateFormat dateFormatter;
-    private MonthYearPicker myp;
+    private MonthYearPicker picker;
 
 
     @Override
@@ -51,18 +42,16 @@ public class InsertOrchidActivity extends AppCompatActivity implements View.OnCl
         setContentView(R.layout.activity_insert_orchid);
 
         bindViews();
-        Date = findViewById(R.id.date_test);
-        dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
 
         mDate.setOnClickListener(this);
 
-        myp = new MonthYearPicker(this);
-        myp.build(new DialogInterface.OnClickListener() {
+        picker = new MonthYearPicker(this);
+        picker.build(new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                mDate.setText(myp.getSelectedMonthShortName() + " / " + myp.getSelectedYear());
-                String date = "01/"+(myp.getSelectedMonth()+1)+"/"+myp.getSelectedYear();
+                mDate.setText(picker.getSelectedMonthShortName() + " / " + picker.getSelectedYear());
+                String date = "01/"+(picker.getSelectedMonth()+1)+"/"+ picker.getSelectedYear();
                 try {
                     Date date1 = new SimpleDateFormat("dd/MM/yyyy").parse(date);
                     long dateInMillis = date1.getTime();
@@ -80,7 +69,7 @@ public class InsertOrchidActivity extends AppCompatActivity implements View.OnCl
     @Override
     public void onClick(View view) {
         ViewsUtil.hideKeyboard(this);
-        myp.show();
+        picker.show();
     }
 
     @Override

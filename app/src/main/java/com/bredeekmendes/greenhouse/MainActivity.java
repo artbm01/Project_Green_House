@@ -14,21 +14,18 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.bredeekmendes.greenhouse.data.OrchidDbContract;
-import com.bredeekmendes.greenhouse.utilities.OrchidDateUtils;
+import com.google.gson.Gson;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class MainActivity extends AppCompatActivity implements OrchidAdapter.ListItemClickListener,
         LoaderManager.LoaderCallbacks<Cursor>{
@@ -199,6 +196,15 @@ public class MainActivity extends AppCompatActivity implements OrchidAdapter.Lis
         if (data.getCount() == 0) {
             Toast.makeText(this, "No orchid to show!", Toast.LENGTH_SHORT).show();
         }
+
+
+/*        Map hashMap = new HashMap();
+        Gson gason = new Gson();
+        for (int i = 0; i < mCursor.getColumnCount(); i++) {
+            hashMap.put(mCursor.getColumnName(i),mCursor.getString(i));
+        }
+        Log.d("JASON",gason.toJson(hashMap));*/
+
     }
 
     @Override
